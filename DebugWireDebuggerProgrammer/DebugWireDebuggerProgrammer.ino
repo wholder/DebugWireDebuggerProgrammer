@@ -283,7 +283,7 @@
 //      1 = 0   Brown-out Detector trigger level bit 1
 //      0 = 1   Brown-out Detector trigger level bit 0
 
-#define DEVELOPER 0
+#define DEVELOPER 1
 
 #define PMODE    8    // Input - HIGH = Program Mode, LOW = Debug Mode
 #define VCC      9    // Target Pin 8 - Vcc
@@ -2041,6 +2041,30 @@ void debugger () {
           powerOff();
           println(F("VCC off"));
           break;
+
+			case 'G': // glitch the power to the chip
+				// give it 10 sec to allow window switching
+				getString();
+				byte dd = readDecimal(1);
+				println(F("Glitching in 3s"));
+				for(int i=0;i<3;i++) {
+					delay(1000);
+				}
+				
+				Serial.println(dd);
+
+				for(int i=0;i<1000;i++) {
+					digitalWrite(VCC, LOW);
+					delayMicroseconds(dd);
+					digitalWrite(VCC, HIGH);
+					pinMode(VCC, OUTPUT);
+					delayMicroseconds(dd);
+					if (!(i%100))
+						Serial.println(":");
+				}
+				println(F("VCC Restored"));
+				break;
+				
 #endif
       
         case 'B':                                             // Cycle Vcc and Send BREAK to engage debugWire Mode
